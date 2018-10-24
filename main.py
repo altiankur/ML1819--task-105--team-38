@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[62]:
+# In[241]:
 
 
 import numpy as np
@@ -9,19 +9,25 @@ import pandas as pd
 data=pd.read_csv('creditcard.csv')
 
 
-# In[63]:
+# In[242]:
 
 
-data.tail()
+data.head()
 
 
-# In[64]:
+# In[243]:
 
 
 data.describe()
 
 
-# In[65]:
+# In[ ]:
+
+
+
+
+
+# In[244]:
 
 
 numcols = data.columns
@@ -34,16 +40,27 @@ numcols
 
 
 
-# In[66]:
+# In[245]:
 
 
+from sklearn import preprocessing
 Features = np.array(data[['Time', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'V7', 'V8', 'V9', 'V10',
        'V11', 'V12', 'V13', 'V14', 'V15', 'V16', 'V17', 'V18', 'V19', 'V20',
        'V21', 'V22', 'V23', 'V24', 'V25', 'V26', 'V27', 'V28', 'Amount']])
-Features[2, :]
+col = Features[:, -1]
+scaler = preprocessing.StandardScaler().fit(col.reshape(-1,1))
+col = scaler.transform(col.reshape(-1,1))
+col = np.ravel(col)
+Features[:, -1] = col
 
 
-# In[67]:
+# In[ ]:
+
+
+
+
+
+# In[246]:
 
 
 import numpy.random as nr
@@ -56,33 +73,39 @@ x_train = np.array(Features[index[0], :])
 y_train = np.ravel(labels[index[0]])
 x_test = np.array(Features[index[1], :])
 y_test = np.ravel(labels[index[1]])
-print (x_train.shape)
+print (y_test)
 print (y_train.shape)
 
 
-# In[68]:
+# In[ ]:
+
+
+
+
+
+# In[247]:
 
 
 from sklearn.linear_model import LogisticRegression
-log_model = LogisticRegression(fit_intercept = False)
+log_model = LogisticRegression(fit_intercept = True)
 log_model.fit(x_train, y_train)
 
 
-# In[69]:
+# In[248]:
 
 
 print(log_model.intercept_)
 print(log_model.coef_)
 
 
-# In[72]:
+# In[249]:
 
 
 import sklearn.metrics as sklm
 y_hat_p = log_model.predict_proba(x_test)
 def score_model(y_p, threshold):
     return np.array([1 if x > threshold else 0 for x in y_p[:, 1]])
-y_hat = score_model(y_hat_p, 0.9)
+y_hat = score_model(y_hat_p, 0.25)
 
 def print_metrics(y_true, y_predicted):
     metrics = sklm.precision_recall_fscore_support(y_true, y_predicted)
@@ -98,13 +121,20 @@ def print_metrics(y_true, y_predicted):
     print("precision:  %6.2f"%metrics[0][0] + "          %6.2f"%metrics[0][1])
     print("Recall:     %6.2f"%metrics[1][0] + "          %6.2f"%metrics[1][1])
     print("fscore:     %6.2f"%metrics[2][0] + "          %6.2f"%metrics[2][1])
-    
+    print("")
+    mp = (metrics[0][0] + metrics[0][1]) / 2
+    mr = (metrics[1][0] + metrics[1][1]) / 2
+    f1 = (2 * mp * mr) / (mp + mr)
+    print("Average Precision: %6.2f"%mp)
+    print("Average Recall:    %6.2f"%mr)
+    print("F1 Score:          %6.2f"%f1)
 print_metrics(y_test, y_hat)
 
 
-# In[71]:
+# In[250]:
 
 
+import matplotlib.pyplot as plt
 def plot_roc(y_true, prob):
     fpr, tpr, threshold = sklm.roc_curve(y_true, prob[:, 1])
     auc = sklm.auc(fpr, tpr)
