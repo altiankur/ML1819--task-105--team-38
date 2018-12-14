@@ -1,0 +1,8 @@
+Machine Learning 2nd phase goals
+
+    1. Use cross validation instead of train test.
+    2. Use different noise addition techniques.
+    3. Use another dataset.
+    4. Hyperparameter tuning.
+    5. Dataset visualization.
+    6. Mention the library used for algorithms.
